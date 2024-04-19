@@ -167,16 +167,21 @@ $toreturn["real"] = json_encode($toreturn_real);
         response = requests.get(url, timeout=DEFAULT_TIMEOUT, verify=verify_ssl)
         return response.json()
 
-    def _post(self, path, payload=None):
+    def _post(self, path, payload=None, json=False):
         # /api/<module>/<controller>/<command>/[<param1>/[<param2>/...]]
         verify_ssl = True
         if "verify_ssl" in self._opts.keys():
             verify_ssl = self._opts["verify_ssl"]
 
         url = f"{self._url}{path}"
-        response = requests.post(
-            url, data=payload, timeout=DEFAULT_TIMEOUT, verify=verify_ssl
-        )
+        if json:
+            response = requests.post(
+                url, json=payload, timeout=DEFAULT_TIMEOUT, verify=verify_ssl
+            )
+        else:
+            response = requests.post(
+                url, data=payload, timeout=DEFAULT_TIMEOUT, verify=verify_ssl
+            )
         return response.json()
 
     @_log_errors
@@ -1175,3 +1180,21 @@ if (file_exists('/usr/local/etc/inc/notices.inc')) {{
         )
 
         self._exec_php(script)
+
+    @_log_errors
+    def get_dnsbl_status(self):
+        unbound_config = self._get("/api/unbound/settings/get")
+        if unbound_config['unbound']['dnsbl']['enabled'] == '1':
+            return True
+        else:
+            return False
+    
+    @_log_errors
+    def enable_dnsbl(self):
+        data = {'unbound': {'dnsbl': {'enabled': "1"}}}
+        self._post("/api/unbound/settings/set",data,True)
+
+    @_log_errors
+    def disable_dnsbl(self):
+        data = {'unbound': {'dnsbl': {'enabled': "0"}}}
+        self._post("/api/unbound/settings/set",data,True)

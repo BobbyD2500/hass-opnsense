@@ -287,6 +287,11 @@ class OPNSenseData:
     @_log_timing
     def _get_arp_table(self):
         return self._client.get_arp_table(True)
+    
+    @_log_timing
+    def _get_dnsbl_status(self):
+        return self._client.get_dnsbl_status()
+    
 
     def update(self, opts={}):
         """Fetch the latest state from OPNsense."""
@@ -341,6 +346,7 @@ class OPNSenseData:
                         lease_stats["offline"] += 1
 
             self._state["dhcp_stats"]["leases"] = lease_stats
+            self._state["dnsbl"] = self._get_dnsbl_status()
 
             # calcule pps and kbps
             update_time = dict_get(self._state, "update_time")

@@ -185,6 +185,25 @@ async def async_setup_entry(
                     ),
                 )
                 entities.append(entity)
+
+        #DNSBL Enable/Disable
+        icon = "mdi:block-helper"
+        enabled_default = True
+        device_class = SwitchDeviceClass.SWITCH
+        entity = OPNSenseDNSBLSwitch(
+            config_entry,
+            coordinator,
+            SwitchEntityDescription(
+                key="dnsbl",
+                name="DNSBL",
+                icon=icon,
+                # entity_category=entity_category,
+                device_class=device_class,
+                entity_registry_enabled_default=enabled_default,
+            ),
+        )
+        entities.append(entity)
+
         return entities
 
     cem = CoordinatorEntityManager(
@@ -412,6 +431,49 @@ class OPNSenseServiceSwitch(OPNSenseSwitch):
         client = self._get_opnsense_client()
         result = await self.hass.async_add_executor_job(
             client.stop_service, service["name"]
+        )
+        if result:
+            await self.coordinator.async_refresh()
+
+class OPNSenseDNSBLSwitch(OPNSenseSwitch):
+    def _opnsense_get_property_name(self):
+        return self.entity_description.key.split(".")[2]
+
+    def _opnsense_get_service_name(self):
+        return self.entity_description.key.split(".")[1]
+
+    def _opnsense_get_service(self):
+        state = self.coordinator.data
+        found = None
+        service_name = self._opnsense_get_service_name()
+        for service in state["services"]:
+            if service["name"] == service_name:
+                found = service
+                break
+        return found
+
+    @property
+    def is_on(self):
+        try:
+            state = self.coordinator.data["dnsbl"]
+            return state
+        except KeyError:
+            return STATE_UNKNOWN
+
+    async def async_turn_on(self, **kwargs):
+        """Turn the entity on."""
+        client = self._get_opnsense_client()
+        result = await self.hass.async_add_executor_job(
+            client.enable_dnsbl
+        )
+        if result:
+            await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs):
+        """Turn the entity off."""
+        client = self._get_opnsense_client()
+        result = await self.hass.async_add_executor_job(
+            client.disable_dnsbl
         )
         if result:
             await self.coordinator.async_refresh()
