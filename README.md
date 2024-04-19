@@ -1,4 +1,3 @@
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Ftravisghansen%2Fhass-opnsense%2Fbadge%3Fref%3Dmain&style=for-the-badge)](https://actions-badge.atrox.dev/travisghansen/hass-opnsense/goto?ref=main)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 # hass-opnsense
@@ -10,6 +9,8 @@ interactions. This project is currently a proof-of-concept and may fail to work
 at any time.
 
 Initial development was done againt `OPNsense` `21.7` and `Home Assistant` `2021.10`.
+
+This is a fork from https://github.com/travisghansen/hass-opnsense that implements a DNS blocklist switch.
 
 # Overview
 
@@ -67,7 +68,7 @@ In `Home Assistant`, add this repository to your `HACS` installation or clone th
 
 ### HACS_installation
 
-In HACS, add this as a custom repository: https://github.com/travisghansen/hass-opnsense then go to the
+In HACS, add this as a custom repository: https://github.com/bobbyd2500/hass-opnsense then go to the
 HACS integrations page, search for `OPNsense integration for Home Assistant` and install it. Once the
 integration is installed be sure to restart `Home Assistant`.
 
@@ -162,6 +163,7 @@ causing issues with the tracker. See #22 for details.
   sent/received, kB/s sent/received)
 
 ## switch
+- DNS blocklist enable/disable
 
 All of the switches below are disabled by default.
 
